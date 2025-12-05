@@ -41,57 +41,7 @@ function wcdop_duplicate_order() {
     ] );
 
     foreach ( $order->get_items() as $item ) {
-        $new_item_id = $new_order->add_product( $item->get_product(), $item->get_quantity(), [
-            'variation' => $item->get_variation_id() ? wc_get_product( $item->get_variation_id() )->get_attributes() : [],
-            'totals'    => [
-                'subtotal'     => $item->get_subtotal(),
-                'subtotal_tax' => $item->get_subtotal_tax(),
-                'total'        => $item->get_total(),
-                'total_tax'    => $item->get_total_tax(),
-            ],
-        ] );
-
-        if ( $new_item_id ) {
-            $new_item = $new_order->get_item( $new_item_id );
-            foreach ( $item->get_meta_data() as $meta ) {
-                $new_item->add_meta_data( $meta->key, $meta->value );
-            }
-            $new_item->save();
-        }
-    }
-
-    foreach ( $order->get_items( 'fee' ) as $item ) {
-        $fee = new WC_Order_Item_Fee();
-        $fee->set_name( $item->get_name() );
-        $fee->set_amount( $item->get_total() );
-        $fee->set_tax_class( $item->get_tax_class() );
-        $fee->set_tax_status( $item->get_tax_status() );
-        $fee->set_total( $item->get_total() );
-        $new_order->add_item( $fee );
-    }
-
-    foreach ( $order->get_items( 'shipping' ) as $item ) {
-        $shipping = new WC_Order_Item_Shipping();
-        $shipping->set_method_title( $item->get_method_title() );
-        $shipping->set_method_id( $item->get_method_id() );
-        $shipping->set_total( $item->get_total() );
-        $new_order->add_item( $shipping );
-    }
-
-    foreach ( $order->get_items( 'tax' ) as $item ) {
-        $tax = new WC_Order_Item_Tax();
-        $tax->set_rate_id( $item->get_rate_id() );
-        $tax->set_tax_total( $item->get_tax_total() );
-        $tax->set_shipping_tax_total( $item->get_shipping_tax_total() );
-        $new_order->add_item( $tax );
-    }
-
-    foreach ( $order->get_items( 'coupon' ) as $item ) {
-        $coupon = new WC_Order_Item_Coupon();
-        $coupon->set_code( $item->get_code() );
-        $coupon->set_discount( $item->get_discount() );
-        $coupon->set_discount_tax( $item->get_discount_tax() );
-        $new_order->add_item( $coupon );
+        $new_order->add_product( $item->get_product(), $item->get_quantity() );
     }
 
     $billing_address = $order->get_address( 'billing' );
@@ -121,20 +71,6 @@ function wcdop_duplicate_order() {
         $new_order->set_shipping_postcode( $shipping_address['postcode'] );
         $new_order->set_shipping_country( $shipping_address['country'] );
     }
-    $new_order->set_payment_method( $order->get_payment_method() );
-    $new_order->set_payment_method_title( $order->get_payment_method_title() );
-
-    $meta_blacklist = [
-        '_transaction_id',
-        '_payment_method_token',
-        '_date_paid',
-    ];
-
-    foreach ( $order->get_meta_data() as $meta ) {
-        if ( ! in_array( $meta->key, $meta_blacklist, true ) ) {
-            $new_order->add_meta_data( $meta->key, $meta->value );
-        }
-    }
 
     $new_order->calculate_totals();
     $new_order->save();
@@ -158,7 +94,7 @@ function wcdop_enqueue_styles( $hook ) {
     wp_enqueue_style(
         'wcdop-styles',
         plugin_dir_url( __FILE__ ) . 'css/style.css',
-        [],
+        ['dashicons'],
         '1.0'
     );
 }
