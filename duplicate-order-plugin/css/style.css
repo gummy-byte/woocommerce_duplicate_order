@@ -1,0 +1,4 @@
+.wc-action-button-duplicate::after {
+    font-family: Dashicons;
+    content: "\f521"; /* dashicons-clone */
+}
