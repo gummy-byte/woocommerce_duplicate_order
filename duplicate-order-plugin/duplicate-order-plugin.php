@@ -142,3 +142,23 @@ function wcdop_duplicate_order() {
     wp_redirect( admin_url( 'post.php?post=' . $new_order->get_id() . '&action=edit' ) );
     exit;
 }
+
+add_action( 'admin_enqueue_scripts', 'wcdop_enqueue_styles' );
+
+function wcdop_enqueue_styles( $hook ) {
+    if ( 'edit.php' !== $hook ) {
+        return;
+    }
+
+    global $post_type;
+    if ( 'shop_order' !== $post_type ) {
+        return;
+    }
+
+    wp_enqueue_style(
+        'wcdop-styles',
+        plugin_dir_url( __FILE__ ) . 'css/style.css',
+        [],
+        '1.0'
+    );
+}
